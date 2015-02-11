@@ -1,0 +1,23 @@
+{
+  "name": "lucidyze-agent",
+  "version": "0.0.1",
+  "description": "Agent for Lucidyze Monitoring System",
+  "main": "agent.js",
+  "dependencies": {
+    "json-socket": "^0.1.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/makkbe/lucidyze"
+  },
+  "author": "Marcus Bengtsson",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/makkbe/lucidyze/issues"
+  },
+  "homepage": "https://github.com/makkbe/lucidyze"
+}
