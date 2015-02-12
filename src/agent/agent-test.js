@@ -9,7 +9,7 @@ var c_listen_port = config.listen_port;
 
 var JsonSocket = require('json-socket');
 
-JsonSocket.sendSingleMessageAndReceive(c_listen_port, c_listen_address, { command: process.argv[2]}, function(err, message) {
+JsonSocket.sendSingleMessageAndReceive(c_listen_port, c_listen_address, { command: 'register', parameters: [ { secret: 'mysecret' } ] }, function(err, message) {
     if (err) {
         //Something went wrong
         throw err;
