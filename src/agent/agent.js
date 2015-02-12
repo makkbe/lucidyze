@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 // Configuration
-var lucidyze_dir = '/etc/lucidyze/';
+var lucidyze_dir = '../../config/';
 var lucidyze_version = '0.0.1';
 
 var config = require(lucidyze_dir + 'agent-config');
@@ -15,7 +15,7 @@ var dgram = require('dgram');
 var mcastsocket = dgram.createSocket('udp4');
 
 function sendAnnouncement() {
-	var message = new Buffer(JSON.stringify( { lucidyze: 'agent', version: lucidyze_version, secret: config.secret } ));
+	var message = new Buffer(JSON.stringify( { lucidyze: 'agent', version: lucidyze_version, port: config.listen_port, secret: config.secret } ));
 	mcastsocket.send(message, 0, message.length, 50005, '236.2.3.6');
 }
 
@@ -27,109 +27,115 @@ server.listen(config.listen_port, config.listen_address);
 server.on('connection', function(socket) {
   socket = new JsonSocket(socket);
   socket.on('message', function(message) {
-    switch (message.command) {
-	    case 'commands':
-        socket.sendMessage({
-          command: 'commands',
-          response: [
-            {
-              command: 'uptime',
-              parameters: 'none',
-              description: 'System uptime in seconds',
-              response: {
-                type: 'numeric',
-                unit: 'seconds' 
-              }             
-            },
-            {
-              command: 'loadavg',
-              parameters: 'none',
-              description: 'System load average',
-              response: {
-                type: '[numeric]',
-                unit: 'none'
+    if (message.secret != config.secret) {
+      socket.sendMessage({ 
+        error: 'Invalid secret!'          
+      });
+    } else {
+      switch (message.command) {
+  	    case 'commands':
+          socket.sendMessage({
+            command: 'commands',
+            response: [
+              {
+                command: 'uptime',
+                parameters: 'none',
+                description: 'System uptime in seconds',
+                response: {
+                  type: 'numeric',
+                  unit: 'seconds' 
+                }             
+              },
+              {
+                command: 'loadavg',
+                parameters: 'none',
+                description: 'System load average',
+                response: {
+                  type: '[numeric]',
+                  unit: 'none'
+                }
+              },
+              {
+                command: 'totalmem',
+                parameters: 'none',
+                description: 'Total system memory in bytes',
+                response: {
+                  type: 'numeric',
+                  unit: 'bytes'
+                }
+              },
+              {
+                command: 'freemem',
+                parameters: 'none',
+                description: 'Free system memory in bytes',
+                response: {
+                  type: 'numeric',
+                  unit: 'bytes'
+                }
+              },
+              {
+                command: 'hostname',
+                parameters: 'none',
+                description: 'System hostname',
+                response: {
+                  type: 'string',
+                  unit: 'none'
+                }
               }
-            },
-            {
-              command: 'totalmem',
-              parameters: 'none',
-              description: 'Total system memory in bytes',
-              response: {
-                type: 'numeric',
-                unit: 'bytes'
-              }
-            },
-            {
-              command: 'freemem',
-              parameters: 'none',
-              description: 'Free system memory in bytes',
-              response: {
-                type: 'numeric',
-                unit: 'bytes'
-              }
-            },
-            {
-              command: 'hostname',
-              parameters: 'none',
-              description: 'System hostname',
-              response: {
-                type: 'string',
-                unit: 'none'
-              }
+            ]
+          });
+          break;
+        case 'uptime':
+          var uptime = os.uptime();
+          socket.sendMessage({ 
+            command: 'uptime',
+            response: { 
+              value: uptime
             }
-          ]
-        });
-        break;
-      case 'uptime':
-        var uptime = os.uptime();
-        socket.sendMessage({ 
-          command: 'uptime',
-          response: { 
-            value: uptime
-          }
-        });
-        break;
-      case 'loadavg':
-        var load = os.loadavg();
-        socket.sendMessage({ 
-          command: 'loadavg',
-          response: { 
-            value: load
-          }
-        });       
-        break;
-      case 'totalmem':
-        var mem = os.totalmem();
-        socket.sendMessage({ 
-          command: 'totalmem',
-          response: { 
-            value: mem
-          }
-        });       
-        break;
-      case 'freemem':
-        var mem = os.freemem();
-        socket.sendMessage({ 
-          command: 'freemem',
-          response: { 
-            value: mem
-          }
-        });       
-        break;
-      case 'hostname':
-        var name = os.hostname();
-        socket.sendMessage({ 
-          command: 'hostname',
-          response: { 
-            value: name
-          }
-        });       
-        break;        
-      default:
-        socket.sendMessage({ 
-          error: 'Unknown command!'          
-        });   
-        break;
+          });
+          break;
+        case 'loadavg':
+          var load = os.loadavg();
+          socket.sendMessage({ 
+            command: 'loadavg',
+            response: { 
+              value: load
+            }
+          });       
+          break;
+        case 'totalmem':
+          var mem = os.totalmem();
+          socket.sendMessage({ 
+            command: 'totalmem',
+            response: { 
+              value: mem
+            }
+          });       
+          break;
+        case 'freemem':
+          var mem = os.freemem();
+          socket.sendMessage({ 
+            command: 'freemem',
+            response: { 
+              value: mem
+            }
+          });       
+          break;
+        case 'hostname':
+          var name = os.hostname();
+          socket.sendMessage({ 
+            command: 'hostname',
+            response: { 
+              value: name
+            }
+          });       
+          break;        
+        default:
+          socket.sendMessage({ 
+            error: 'Unknown command!'          
+          });   
+          break;
+      }
     }
   });
 });
