@@ -6,7 +6,8 @@ config.listen_port = 16001;
 
 // Network address to listen on.
 // Default: 127.0.0.1 
-config.listen_address = '192.168.2.100';
+//config.listen_address = '192.168.2.100';
+config.listen_address = '10.10.0.164';
 
 // Agent secret.
 // Default: SHA-1('CHANGEME')

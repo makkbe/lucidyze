@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
+var Agent = require('./agent');
 var mcastserver = require('dgram').createSocket('udp4');
-var JsonSocket = require('json-socket');
  
 mcastserver.on('listening', function() {
   mcastserver.setBroadcast(true);
@@ -11,25 +11,22 @@ mcastserver.on('listening', function() {
 mcastserver.on('message', function(message, rinfo) {
   var jsonmessage = JSON.parse(message);
   
-  if (jsonmessage.lucidyze == 'agent') {
+  if (jsonmessage.message === 'announcement') {
+	  var agent = new Agent(jsonmessage);
+	  agent.getCommands();
+/*
+	  var agentname = jsonmessage.agent
     var agentsecret = jsonmessage.secret;
     var agentversion = jsonmessage.version;
-    var agentip = rinfo.address;
+    var agentip = jsonmessage.address;
     var agentport = jsonmessage.port;
     
-    console.log("Agent at " + agentip + ":" + agentport + " running v" + agentversion + " has announced itself with secret " + agentsecret);
+    console.log("Agent " + agentname + " at " + agentip + ":" + agentport + " running v" + agentversion + " has announced itself with secret " + agentsecret);
     
     getCommands(agentip, agentport, agentsecret);
+*/
   }
 });
  
 mcastserver.bind(50005);
 
-function getCommands(agentip, agentport, agentsecret) {
-  JsonSocket.sendSingleMessageAndReceive(agentport, agentip, {
-    secret: agentsecret,
-    command: 'commands' }, function(err, message) {
-      console.log('Agent said: '+ JSON.stringify(message));
-    }
-  );
-}

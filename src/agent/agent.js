@@ -12,10 +12,12 @@ var net = require('net'),
 var os = require('os');
 var dgram = require('dgram');
 
+//console.log(JSON.stringify(os.networkInterfaces()));
+
 var mcastsocket = dgram.createSocket('udp4');
 
 function sendAnnouncement() {
-	var message = new Buffer(JSON.stringify( { lucidyze: 'agent', version: lucidyze_version, port: config.listen_port, secret: config.secret } ));
+	var message = new Buffer(JSON.stringify({ message: 'announcement', agent: os.hostname(), version: lucidyze_version, address: config.listen_address, port: config.listen_port, secret: config.secret } ));
 	mcastsocket.send(message, 0, message.length, 50005, '236.2.3.6');
 }
 
